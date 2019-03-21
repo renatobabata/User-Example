@@ -1,6 +1,7 @@
 class User{
 
         constructor(name,gender,birth,country,email,password,photo,admin){
+            this._id;
             this._name =  name;
             this._gender = gender;
             this._birth = birth;
@@ -11,6 +12,10 @@ class User{
             this._admin = admin;
             this._register = new Date();
 
+        }
+
+        get id(){
+            return this._id;
         }
 
         get name(){
@@ -51,6 +56,74 @@ class User{
 
         set photo(value){
             this._photo = value;
+        }
+
+        loadFromJSON(json){
+
+            for(let name in json){
+                switch(name){
+
+                    case '_register':
+                        this[name] =  new Date(json[name]);
+                    break;
+                    default:
+                        this[name] = json[name];
+                    break;
+
+                }            
+            }
+        }
+
+
+        getNewId(){
+
+            let usersID = parseInt(localStorage.getItem("userID"));
+
+            if(!usersID> 0) usersID = 0;
+
+            usersID++;
+
+            localStorage.setItem("usersID",usersID);
+
+            return usersID;
+        }
+
+        save(){
+            //recebe todos os valores do localStorage
+            let users = User.getUsersStorage();
+
+            if(this.id > 0 ){
+                // funcao map busca e altera atributos 
+                users.map(u => {
+
+                    if(u._id == this.id){
+                        // mesclar 2 JSONs
+                        Object.assign(u,this);
+                    }
+
+                    return u;
+                });
+            }else{
+
+                this._id = this.getNewId();
+                users.push(this);
+
+            }
+
+            localStorage.setItem("users",JSON.stringify(users));
+        }
+
+        remove(){
+
+            let users = User.getUsersStorage();
+
+            users.forEach((userData,index)=>{
+                if(this._id == userData._id){
+                // funcao nativa para remover. Remover na posicao 'index' , quantidade 1
+                    users.splice(index,1);               
+                }
+            });
+            localStorage.setItem("users",JSON.stringify(users));
         }
 
 }
